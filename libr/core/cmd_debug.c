@@ -3831,6 +3831,7 @@ static bool cmd_dcu (RCore *core, const char *input) {
 		r_core_cmd_help (core, help_msg_dcu);
 		return false;
 	}
+	eprintf("SOLOMON_DEBUG dcu - input : %s\n", input);
 	to = UT64_MAX;
 	if (input[2] == '.') {
 		ptr = strchr (input + 3, ' ');
@@ -3881,8 +3882,10 @@ static bool cmd_dcu (RCore *core, const char *input) {
 		r_cons_break_pop ();
 	} else {
 		ut64 addr = from;
+		eprintf("SOLOMON_DEBUG dcu - core->dbg->btalgo : %s, core->dbg->arch : %s, core->dbg->bits : %d\n", core->dbg->btalgo, core->dbg->arch, core->dbg->bits);
 		if (!strcmp (core->dbg->btalgo, "trace") && core->dbg->arch
 		    && !strcmp (core->dbg->arch, "x86") && core->dbg->bits == 4) {
+			// SOLOMON_DEBUG true if (core->dbg->btalgo != "trace") && (core->dbg->arch != "x86") && (core->dbg->bits == 4)
 			unsigned long steps = 0;
 			long level = 0;
 			const char *pc_name = core->dbg->reg->name[R_REG_NAME_PC];
@@ -3949,11 +3952,15 @@ static bool cmd_dcu (RCore *core, const char *input) {
 			return true;
 		}
 		eprintf ("Continue until 0x%08"PFMT64x" using %d bpsize\n", addr, core->dbg->bpsize);
+		eprintf("SOLOMON_DEBUG dcu - Executing r_reg_arena_swap\n");
+		// SOLOMON_DEBUG What does r_reg_arena_swap do?
 		r_reg_arena_swap (core->dbg->reg, true);
 		if (r_bp_add_sw (core->dbg->bp, addr, core->dbg->bpsize, R_BP_PROT_EXEC)) {
 			if (r_debug_is_dead (core->dbg)) {
 				eprintf ("Cannot continue, run ood?\n");
 			} else {
+				eprintf("SOLOMON_DEBUG dcu - Executing r_debug_continue\n");
+				//SOLOMON_DEBUG What does r_debug_continue do?
 				r_debug_continue (core->dbg);
 			}
 			r_bp_del (core->dbg->bp, addr);
